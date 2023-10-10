@@ -1,0 +1,2 @@
+# mspro-core
+msproadmin core
