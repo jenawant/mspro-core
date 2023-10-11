@@ -1,0 +1,26 @@
+<?php
+declare(strict_types=1);
+/**
+ * MsProAdmin is forked from Min-eAdmin, with the aim of building the system more customizable and faster
+ */
+
+namespace {NAMESPACE};
+
+{USE}
+use MsPro\Abstracts\AbstractService;
+
+/**
+ * {COMMENT}
+ */
+class {CLASS_NAME} extends AbstractService
+{
+    /**
+     * @var {MAPPER}
+     */
+    public $mapper;
+
+    public function __construct({MAPPER} $mapper)
+    {
+        $this->mapper = $mapper;
+    }
+}

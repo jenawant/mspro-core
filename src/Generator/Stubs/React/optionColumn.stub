@@ -1,0 +1,23 @@
+columns.push({
+  title: intl.formatMessage({ id: 'component.table.option.title' }),
+  width: CRUD.operationWidth,
+  valueType: 'option',
+  key: 'option',
+  render: (text: any, record: any) => [
+    CRUD.edit.show && (
+        <EditButton
+          key="edit"
+          CRUD={CRUD}
+          onClick={() => {
+            setRow(record);
+            setFormVisible(true);
+          }}
+        />
+      ),
+      CRUD.delete.show && (
+        <DeleteButton key="delete" CRUD={CRUD} id={record?.[CRUD.pk]} actionRef={actionRef} />
+      ),
+  ],
+  hideInForm: true,
+  hideInSearch: true,
+});

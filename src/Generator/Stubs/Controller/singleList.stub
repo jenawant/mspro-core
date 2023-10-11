@@ -1,0 +1,24 @@
+
+    /**
+     * 列表
+     * @return ResponseInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    #[GetMapping("index"), Permission("{INDEX_PERMISSION}")]
+    public function index(): ResponseInterface
+    {
+        return $this->success($this->service->getPageList($this->request->all()));
+    }
+
+    /**
+     * 选项列表
+     * @return ResponseInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    #[GetMapping("option"), Permission("{INDEX_PERMISSION}")]
+    public function option(): ResponseInterface
+    {
+        return $this->success($this->service->getList($this->request->all()));
+    }

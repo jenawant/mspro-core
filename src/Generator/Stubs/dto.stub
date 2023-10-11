@@ -1,0 +1,15 @@
+<?php
+namespace {NAMESPACE};
+
+use MsPro\Interfaces\MsProModelExcel;
+use MsPro\Annotation\ExcelData;
+use MsPro\Annotation\ExcelProperty;
+
+/**
+ * {COMMENT}
+ */
+#[ExcelData]
+class {CLASS_NAME} implements MsProModelExcel
+{
+{LIST}
+}

@@ -1,0 +1,48 @@
+<?php
+declare(strict_types=1);
+/**
+ * MsProAdmin is forked from Min-eAdmin, with the aim of building the system more customizable and faster
+ */
+
+namespace {NAMESPACE};
+
+{USE}
+use Hyperf\Di\Annotation\Inject;
+use Hyperf\HttpServer\Annotation\Controller;
+use Hyperf\HttpServer\Annotation\DeleteMapping;
+use Hyperf\HttpServer\Annotation\GetMapping;
+use Hyperf\HttpServer\Annotation\PostMapping;
+use Hyperf\HttpServer\Annotation\PutMapping;
+use MsPro\Annotation\Auth;
+use MsPro\Annotation\RemoteState;
+use MsPro\Annotation\OperationLog;
+use MsPro\Annotation\Permission;
+use MsPro\MsProController;
+use Psr\Http\Message\ResponseInterface;
+
+/**
+ * {COMMENT}
+ * Class {CLASS_NAME}
+ */
+#[Controller(prefix: "{CONTROLLER_ROUTE}"), Auth]
+class {CLASS_NAME} extends MsProController
+{
+    /**
+     * 业务处理服务
+     * {SERVICE}
+     */
+    #[Inject]
+    protected {SERVICE} $service;
+
+    {FUNCTIONS}
+
+    /**
+     * 远程万能通用列表接口
+     * @return ResponseInterface
+     */
+    #[PostMapping("remote"), RemoteState(true)]
+    public function remote(): ResponseInterface
+    {
+        return $this->success($this->service->getRemoteList($this->request->all()));
+    }
+}

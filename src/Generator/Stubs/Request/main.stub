@@ -1,0 +1,27 @@
+<?php
+declare(strict_types=1);
+/**
+ * MsProAdmin is forked from Min-eAdmin, with the aim of building the system more customizable and faster
+ */
+namespace {NAMESPACE};
+
+use MsPro\MsProFormRequest;
+
+/**
+ * {COMMENT}
+ */
+class {CLASS_NAME} extends MsProFormRequest
+{
+    /**
+     * 公共规则
+     */
+    public function commonRules(): array
+    {
+        return [];
+    }
+
+    {RULES}
+
+    {ATTRIBUTES}
+
+}

@@ -1,0 +1,133 @@
+/* eslint-disable no-param-reassign */
+import AddButton from '@/components/CRUD/AddButton';
+import DeleteBatchButton from '@/components/CRUD/DeleteBatchButton';
+import DeleteButton from '@/components/CRUD/DeleteButton';
+import EditButton from '@/components/CRUD/EditButton';
+import ExportButton from '@/components/CRUD/ExportButton';
+import ImportButton from '@/components/CRUD/ImportButton';
+import type {
+  ActionType,
+  ProColumns,
+  ProFormColumnsType,
+  ProFormInstance,
+} from '@ant-design/pro-components';
+import { BetaSchemaForm, {FORM_TYPE}, PageContainer, ProTable } from '@ant-design/pro-components';
+import { useIntl } from '@umijs/max';
+import { Button, message as Message } from 'antd';
+import React, { useRef, useState } from 'react';
+
+import {BUSINESS_EN_NAME} from '@/services/api/{MODULE_NAME}/{BUSINESS_EN_NAME}';
+
+{TYPE_COLUMNS}
+
+{{CRUD}}
+
+export default () => {
+  const intl = useIntl();
+  const [message, contextHolder] = Message.useMessage();
+  const actionRef = useRef<ActionType>();
+  const formRef = useRef<ProFormInstance>();
+  const [row, setRow] = useState<ColumnItem>();
+  const [formVisible, setFormVisible] = useState(false);
+
+  {COLUMNS}
+  {OPTION_COLUMN}
+
+  return (
+    <PageContainer
+      header={{
+        breadcrumb: {
+          items: {MENU_BREADCRUMB},
+        },
+      }}
+    >
+      {contextHolder}
+      <ProTable
+        columns={columns}
+        actionRef={actionRef}
+        cardBordered
+        rowSelection={
+          CRUD.rowSelection.showCheckedAll
+            ? {
+                defaultSelectedRowKeys: [],
+              }
+            : undefined
+        }
+        tableAlertRender={({ selectedRowKeys, onCleanSelected }) => (
+          <span>
+          {intl.formatMessage(
+              { id: 'component.table.cancel_select.selected' },
+              { size: selectedRowKeys.length },
+            )}
+            <Button type="link" style={{ marginInlineStart: 8 }} onClick={onCleanSelected}>
+              {intl.formatMessage({ id: 'component.table.cancel_select' })}
+            </Button>
+          </span>
+        )}
+        tableAlertOptionRender={({ selectedRowKeys, onCleanSelected }) => {
+          return (
+            CRUD.rowSelection.showCheckedAll && (
+              <DeleteBatchButton
+                CRUD={CRUD}
+                ids={selectedRowKeys}
+                onFinish={() => {
+                  actionRef.current?.reload();
+                  onCleanSelected();
+                }}
+              />
+            )
+          );
+        }}
+        request={async (params: any = {}, sort: any = {}) => {
+          // SORT
+          let sorts = undefined;
+          if (Object.keys(sort).length > 0) {
+            sorts = {
+              orderBy: Object.keys(sort)[0],
+              orderType: Object.values(sort)[0] == 'ascend' ? 'asc' : 'desc',
+            };
+          }
+          // PAGE
+          params = { page: params.current, ...params };
+          delete params.current;
+
+          const result = await CRUD.api({
+            ...params,
+            ...sorts,
+          });
+          return {
+            data: result.data.items,
+            success: result.success,
+            total: result.data.pageInfo.total,
+          };
+        }}
+        columnsState={{
+          persistenceKey: window.location.pathname.replaceAll('/', '_'),
+          persistenceType: 'localStorage',
+        }}
+        rowKey={CRUD.pk}
+        search={{
+          labelWidth: CRUD.searchLabelWidth as any,
+        }}
+        options={{
+          density: false,
+          setting: {
+            listsHeight: 400,
+          },
+        }}
+        pagination={{
+          showSizeChanger: true,
+          defaultPageSize: 20,
+        }}
+        dateFormatter="string"
+        headerTitle=""
+        toolBarRender={() => [
+          CRUD?.add?.show && <AddButton key="add" CRUD={CRUD} onClick={() => setFormVisible(true)} />,
+          CRUD?.import?.show && <ImportButton key="import" CRUD={CRUD} actionRef={actionRef} />,
+          CRUD?.export?.show && <ExportButton key="export" CRUD={CRUD} />,
+        ]}
+      />
+      {FORM}
+    </PageContainer>
+  );
+};

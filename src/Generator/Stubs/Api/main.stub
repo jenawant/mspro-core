@@ -1,0 +1,10 @@
+import { request } from '@/services/request'
+
+/**
+ * {COMMENT}
+ */
+
+export default {
+{LOAD_API}
+
+}
