@@ -62,7 +62,8 @@
         "tangwei/apidocs": "^2.1",
         "yurunsoft/phpmailer-swoole": "^1.0",
         "zoujingli/ip2region": "2.0.*",
-        "ramsey/uuid": "^4.7"
+        "ramsey/uuid": "^4.7",
+        "phpoffice/phpspreadsheet": "^1.24"
     },
     "suggest": {
         "ext-openssl": "Required to use HTTPS.",
