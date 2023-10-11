@@ -47,6 +47,7 @@
         "hyperf/logger": "3.0.*",
         "hyperf/memory": "3.0.*",
         "hyperf/model-cache": "3.0.*",
+        "hyperf/model-listener": "3.0.*",
         "hyperf/paginator": "3.0.*",
         "hyperf/pool": "3.0.*",
         "hyperf/process": "3.0.*",
@@ -64,6 +65,13 @@
         "zoujingli/ip2region": "2.0.*",
         "ramsey/uuid": "^4.7",
         "phpoffice/phpspreadsheet": "^1.24"
+    },
+    "require-dev": {
+        "friendsofphp/php-cs-fixer": "^3.0",
+        "hyperf/testing": "3.0.*",
+        "phpstan/phpstan": "^1.0",
+        "swoole/ide-helper": "^5.0",
+        "mockery/mockery": "^1.0"
     },
     "suggest": {
         "ext-openssl": "Required to use HTTPS.",
