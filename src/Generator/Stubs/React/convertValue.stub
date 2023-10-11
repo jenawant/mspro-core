@@ -1,0 +1,7 @@
+ (value) => {
+        const type = Object.prototype.toString.call(value);
+        if (type === '[object String]') return [{ url: value }];
+        if (type === '[object Object]') return [{ url: value.url, ...value }];
+        if (type === '[object Array]') return value;
+        return [];
+      },  

@@ -1,0 +1,34 @@
+        <DrawerForm
+          title={intl.formatMessage({ id: row ? 'component.form.title.edit' : 'component.form.title.add' })}
+          width={CRUD.formSetting.width}
+          open={formVisible}
+          onOpenChange={(open) => setFormVisible(open)}
+          submitTimeout={2000}
+          formRef={formRef}
+          request={async () => row ?? {}}
+          autoFocusFirstInput
+          onFinish={async (values) => {
+            const result = row ? await CRUD.edit.api(row?.[CRUD.pk], values) : await CRUD.add.api(values);
+            if (!result.success) {
+              message.error(result.message);
+              return false;
+            }
+
+            message.success(result.message);
+            formRef.current?.resetFields();
+            setRow(undefined);
+            setFormVisible(false);
+            actionRef?.current?.reload?.();
+            return true;
+          }}
+          drawerProps={{
+            maskClosable: false,
+            destroyOnClose: true,
+            onClose: () => {
+              setRow(undefined);
+              formRef.current?.resetFields();
+            },
+          }}
+        >
+          <BetaSchemaForm<ColumnItem, 'dict' | 'country' | 'upload'> layoutType="Embed" columns={columns} />
+        </DrawerForm>
