@@ -9,14 +9,23 @@ declare(strict_types=1);
 namespace MsPro;
 
 use MsPro\Annotation\DependProxyCollector;
+use MsPro\Translatable\Contracts\LocalesInterface;
+use MsPro\Translatable\Locales;
 
 class ConfigProvider
 {
     public function __invoke(): array
     {
         return [
+            // 合并到  config/autoload/processes.php 文件
+            'processes' => [
+                MsPro\Crontab\MsProCrontabProcess::class,
+                Hyperf\AsyncQueue\Process\ConsumerProcess::class
+            ],
             // 合并到  config/autoload/dependencies.php 文件
-            'dependencies' => [],
+            'dependencies' => [
+                LocalesInterface::class => Locales::class,
+            ],
             // 合并到  config/autoload/annotations.php 文件
             'annotations' => [
                 'scan' => [
@@ -40,6 +49,18 @@ class ConfigProvider
                     // 建议默认配置放在 publish 文件夹中，文件命名和组件名称相同
                     'source' => __DIR__ . '/../publish/msproadmin.php',  // 对应的配置文件路径
                     'destination' => BASE_PATH . '/config/autoload/msproadmin.php', // 复制为这个路径下的该文件
+                ],
+                [
+                    'id' => 'translatable',
+                    'description' => 'The config for translatable.',
+                    'source' => __DIR__ . '/../publish/translatable.php',
+                    'destination' => BASE_PATH . '/config/autoload/translatable.php',
+                ],
+                [
+                    'id' => 'async queue',
+                    'description' => 'The config for async queue.',
+                    'source' => __DIR__ . '/../publish/async_queue.php',
+                    'destination' => BASE_PATH . '/config/autoload/async_queue.php',
                 ],
             ],
             // 亦可继续定义其它配置，最终都会合并到与 ConfigInterface 对应的配置储存器中
