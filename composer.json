@@ -58,7 +58,7 @@
         "hyperf/validation": "3.0.*",
         "hyperf/swagger": "3.0.*",
         "hyperf/websocket-server": "3.0.*",
-        "hyperf-ext/mail": "^2.2",
+        "jenawant/mspro-mail": "^1.0.0",
         "overtrue/flysystem-cos": "^5.0",
         "overtrue/flysystem-qiniu": "^3.0",
         "symfony/property-access": "^6.0",
