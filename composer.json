@@ -58,10 +58,10 @@
         "hyperf/validation": "3.0.*",
         "hyperf/swagger": "3.0.*",
         "hyperf/websocket-server": "3.0.*",
+        "hyperf-ext/mail": "^2.2",
         "overtrue/flysystem-cos": "^5.0",
         "overtrue/flysystem-qiniu": "^3.0",
         "symfony/property-access": "^6.0",
-        "yurunsoft/phpmailer-swoole": "^1.0",
         "zoujingli/ip2region": "2.0.*",
         "ramsey/uuid": "^4.7",
         "phpoffice/phpspreadsheet": "^1.24"
