@@ -7,7 +7,8 @@
  *
  * @Description 延迟队列
  * @Author mike
- * @Link   https://gitee.com/xmo/MsProAdmin
+ * @Link   https://github.com/jenawant/msproadmin
+ * @Link https://gitee.com/xmo/MineAdmin
  */
 
 declare(strict_types=1);

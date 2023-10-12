@@ -8,7 +8,8 @@ declare(strict_types=1);
  * Thank you very much for using MsProAdmin.
  *
  * @Author X.Mo<root@imoi.cn>
- * @Link   https://gitee.com/xmo/MsProAdmin
+ * @Link   https://github.com/jenawant/msproadmin
+ * @Link https://gitee.com/xmo/MineAdmin
  */
 
 namespace MsPro\Office\Excel;

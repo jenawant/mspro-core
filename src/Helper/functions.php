@@ -6,7 +6,7 @@
 use App\System\Vo\QueueMessageVo;
 use Hyperf\Contract\StdoutLoggerInterface;
 use Hyperf\Logger\LoggerFactory;
-use Hyperf\Utils\ApplicationContext;
+use Hyperf\Context\ApplicationContext;
 use MsPro\Helper\LoginUser;
 use MsPro\Helper\AppVerify;
 use MsPro\Helper\Id;
