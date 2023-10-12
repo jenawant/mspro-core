@@ -16,7 +16,7 @@ use MsPro\MsProCommand;
 #[Command]
 class MsProAdmin extends MsProCommand
 {
-    protected ?string $name = 'mine';
+    protected ?string $name = 'mspro';
 
     public function configure()
     {
@@ -28,8 +28,8 @@ class MsProAdmin extends MsProCommand
      */
     public function handle()
     {
-        $result = shell_exec('php ' . BASE_PATH . '/bin/hyperf.php | grep mine');
+        $result = shell_exec('php ' . BASE_PATH . '/bin/hyperf.php | grep mspro');
         $this->line($this->getInfo(), 'comment');
-        $this->line(preg_replace('/\s+mine\s+/', '', $result), 'info');
+        $this->line(preg_replace('/\s+mspro\s+/', '', $result), 'info');
     }
 }

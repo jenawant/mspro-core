@@ -23,5 +23,5 @@ abstract class MsProController
      * @var MsPro
      */
     #[Inject]
-    protected MsPro $mine;
+    protected MsPro $mspro;
 }

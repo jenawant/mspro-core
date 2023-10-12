@@ -134,13 +134,13 @@ if (! function_exists('t')) {
     }
 }
 
-if (! function_exists('mine_collect')) {
+if (! function_exists('mspro_collect')) {
     /**
      * 创建一个MsPro的集合类
      * @param null|mixed $value
      * @return \MsPro\MsProCollection
      */
-    function mine_collect($value = null): \MsPro\MsProCollection
+    function mspro_collect($value = null): \MsPro\MsProCollection
     {
         return new \MsPro\MsProCollection($value);
     }

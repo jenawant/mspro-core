@@ -39,10 +39,10 @@ class ModuleGenerator extends MsProGenerator
 
         $this->moduleInfo['name'] = ucfirst($this->moduleInfo['name']);
 
-        $mine = new MsPro;
-        $mine->scanModule();
+        $mspro = new MsPro;
+        $mspro->scanModule();
 
-        if (! empty($mine->getModuleInfo($this->moduleInfo['name']))) {
+        if (! empty($mspro->getModuleInfo($this->moduleInfo['name']))) {
             throw new \RuntimeException('同名模块已存在');
         }
 

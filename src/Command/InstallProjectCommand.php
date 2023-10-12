@@ -141,7 +141,7 @@ class InstallProjectCommand extends MsProCommand
         // 设置数据库
         if ($dbAnswer) {
             $dbchar = $this->ask('please input database charset, default:', 'utf8mb4');
-            $dbname = $this->ask('please input database name, default:', 'mineadmin');
+            $dbname = $this->ask('please input database name, default:', 'msproadmin');
             $dbhost = $this->ask('please input database host, default:', '127.0.0.1');
             $dbport = $this->ask('please input database host port, default:', '3306');
             $prefix = $this->ask('please input table prefix, default:', 'Null');
@@ -271,10 +271,10 @@ class InstallProjectCommand extends MsProCommand
      */
     protected function installLocalModule()
     {
-        /* @var MsPro $mine */
+        /* @var MsPro $mspro */
         $this->line("Installation of local modules is about to begin...\n", 'comment');
-        $mine = make(MsPro::class);
-        $modules = $mine->getModuleInfo();
+        $mspro = make(MsPro::class);
+        $modules = $mspro->getModuleInfo();
         foreach ($modules as $name => $info) {
             $this->call('mspro:migrate-run', ['name' => $name, '--force' => 'true']);
             if ($name === 'System') {
@@ -293,7 +293,7 @@ class InstallProjectCommand extends MsProCommand
         $this->call('mspro:jwt-gen', [ '--jwtSecret' => 'JWT_API_SECRET' ]);
 
         if (! file_exists(BASE_PATH . '/config/autoload/msproadmin.php')) {
-            $this->call('vendor:publish', [ 'package' => 'xmo/mine' ]);
+            $this->call('vendor:publish', [ 'package' => 'jenawant/mspro' ]);
         }
 
         $downloadFrontCode = $this->confirm('Do you downloading the front-end code to "./web" directory?', true);
@@ -302,7 +302,7 @@ class InstallProjectCommand extends MsProCommand
         if ($downloadFrontCode) {
             $this->line(PHP_EOL . ' Now about to start downloading the front-end code' . PHP_EOL, 'comment');
             if (\shell_exec('which git')) {
-                \system('git clone https://gitee.com/mineadmin/mineadmin-vue.git ./web/');
+                \system('git clone https://github.com/jenawant/msproadmin-react.git ./web/');
             } else {
                 $this->warn('Your server does not have the `git` command installed and will skip downloading the front-end project');
             }
@@ -322,12 +322,12 @@ class InstallProjectCommand extends MsProCommand
         // 创建超级管理员
         Db::table("system_user")->insert([
             'id' => env('SUPER_ADMIN', 1),
-            'username' => 'superAdmin',
-            'password' => password_hash('admin123', PASSWORD_DEFAULT),
+            'username' => 'administrator',
+            'password' => password_hash('111111', PASSWORD_DEFAULT),
             'user_type' => '100',
             'nickname' => '创始人',
-            'email' => 'admin@adminmine.com',
-            'phone' => '16858888988',
+            'email' => 'admin@msproadmin.com',
+            'phone' => '18566667777',
             'signed' => '广阔天地，大有所为',
             'dashboard' => 'statistics',
             'created_by' => 0,
@@ -367,8 +367,8 @@ class InstallProjectCommand extends MsProCommand
         }
         $this->line(PHP_EOL . sprintf('%s
 MsProAdmin Version: %s
-default username: superAdmin
-default password: admin123', $this->getInfo(), MsPro::getVersion()), 'comment');
+default username: administrator
+default password: 111111', $this->getInfo(), MsPro::getVersion()), 'comment');
     }
 
     /**

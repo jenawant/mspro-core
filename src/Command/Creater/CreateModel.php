@@ -30,7 +30,7 @@ class CreateModel extends MsProCommand
 
     public function handle()
     {
-        $mine = make(MsPro::class);
+        $mspro = make(MsPro::class);
         $module = $this->input->getOption('module');
         if ($module) {
             $module = ucfirst(trim($this->input->getOption('module')));
@@ -45,7 +45,7 @@ class CreateModel extends MsProCommand
             $this->line('Missing parameter <--module < module_name>>', 'error');
         }
 
-        $moduleInfos = $mine->getModuleInfo();
+        $moduleInfos = $mspro->getModuleInfo();
 
         if (isset($moduleInfos[$module])) {
             $path = "app/{$module}/Model";

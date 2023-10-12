@@ -49,7 +49,7 @@ class MsProCrontabProcess extends AbstractProcess
      * @var MsProCrontabManage
      */
     #[Inject]
-    protected MsProCrontabManage $mineCrontabManage;
+    protected MsProCrontabManage $msproCrontabManage;
 
     /**
      * @param ContainerInterface $container

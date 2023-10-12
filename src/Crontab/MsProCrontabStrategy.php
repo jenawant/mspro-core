@@ -17,7 +17,7 @@ class MsProCrontabStrategy
      * MsProCrontabManage
      */
     #[Inject]
-    protected MsProCrontabManage $mineCrontabManage;
+    protected MsProCrontabManage $msproCrontabManage;
 
     /**
      * MsProExecutor

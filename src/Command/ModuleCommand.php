@@ -29,7 +29,7 @@ class ModuleCommand extends MsProCommand
      */
     protected ?string $name = 'mspro:module';
 
-    protected MsPro $mine;
+    protected MsPro $mspro;
 
     protected Migrator $migrator;
 
@@ -42,7 +42,7 @@ class ModuleCommand extends MsProCommand
     public function configure()
     {
         parent::configure();
-        $this->mine = make(MsPro::class);
+        $this->mspro = make(MsPro::class);
         $this->setHelp('run "php bin/hyperf.php mspro:module --name cms --option install"');
         $this->setDescription('install command of module MsProAdmin');
         $this->addOption(
@@ -63,7 +63,7 @@ class ModuleCommand extends MsProCommand
     {
         $name = $this->input->getOption('name');
         $option = $this->input->getOption('option');
-        $modules = $this->mine->getModuleInfo();
+        $modules = $this->mspro->getModuleInfo();
 
         // 模块名不能叫list，list是展示模块列表
         if ($option === 'list') {

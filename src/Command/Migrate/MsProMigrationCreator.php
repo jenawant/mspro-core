@@ -13,6 +13,6 @@ class MsProMigrationCreator extends MigrationCreator
 
     public function stubPath(): string
     {
-        return BASE_PATH . '/vendor/xmo/mine-core/src/Command/Migrate/Stubs';
+        return BASE_PATH . '/vendor/jenawant/mspro-core/src/Command/Migrate/Stubs';
     }
 }

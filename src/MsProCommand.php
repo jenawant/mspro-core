@@ -32,7 +32,7 @@ abstract class MsProCommand extends HyperfCommand
 
     protected function getStub($filename): string
     {
-        return BASE_PATH . '/vendor/xmo/mine-core/src/Command/Creater/Stubs/' . $filename . '.stub';
+        return BASE_PATH . '/vendor/jenawant/mspro-core/src/Command/Creater/Stubs/' . $filename . '.stub';
     }
 
     protected function getModulePath(): string
