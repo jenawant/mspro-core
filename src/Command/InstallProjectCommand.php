@@ -293,7 +293,10 @@ class InstallProjectCommand extends MsProCommand
         $this->call('mspro:jwt-gen', [ '--jwtSecret' => 'JWT_API_SECRET' ]);
 
         if (! file_exists(BASE_PATH . '/config/autoload/msproadmin.php')) {
-            $this->call('vendor:publish', [ 'package' => 'jenawant/mspro' ]);
+            $this->call('vendor:publish', [ 'package' => 'jenawant/mspro-core' ]);
+        }
+        if (! file_exists(BASE_PATH . '/config/autoload/mail.php')) {
+            $this->call('vendor:publish', [ 'package' => 'jenawant/mspro-mail' ]);
         }
 
         $downloadFrontCode = $this->confirm('Do you downloading the front-end code to "./web" directory?', true);
