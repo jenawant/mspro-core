@@ -8,7 +8,7 @@ namespace MsPro\Command\Creater;
 
 use Hyperf\Command\Annotation\Command;
 use Hyperf\Utils\Filesystem\FileNotFoundException;
-use Hyperf\Utils\Filesystem\Filesystem;
+use Hyperf\Support\Filesystem\Filesystem;
 use MsPro\MsProCommand;
 use Symfony\Component\Console\Input\InputArgument;
 

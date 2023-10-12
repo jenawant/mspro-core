@@ -11,7 +11,7 @@ namespace MsPro\Generator;
 use App\Setting\Model\SettingGenerateTables;
 use App\System\Model\SystemMenu;
 use Hyperf\DbConnection\Db;
-use Hyperf\Utils\Filesystem\Filesystem;
+use Hyperf\Support\Filesystem\Filesystem;
 use MsPro\Exception\NormalStatusException;
 use MsPro\Helper\Str;
 use Psr\Container\ContainerExceptionInterface;

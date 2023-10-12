@@ -7,7 +7,7 @@ declare(strict_types=1);
 namespace MsPro\Generator;
 
 use App\Setting\Model\SettingGenerateTables;
-use Hyperf\Utils\Filesystem\Filesystem;
+use Hyperf\Support\Filesystem\Filesystem;
 use MsPro\Exception\NormalStatusException;
 use MsPro\Helper\Str;
 

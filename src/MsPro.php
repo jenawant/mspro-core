@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace MsPro;
 
-use Hyperf\Utils\Filesystem\Filesystem;
+use Hyperf\Support\Filesystem\Filesystem;
 
 class MsPro
 {

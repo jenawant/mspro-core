@@ -4,22 +4,22 @@
 
 
 declare(strict_types=1);
-namespace Mine\Generator;
+namespace MsPro\Generator;
 
 use App\Setting\Model\SettingGenerateColumns;
 use App\Setting\Model\SettingGenerateTables;
 use App\Setting\Service\SettingGenerateColumnsService;
-use Hyperf\Utils\Filesystem\Filesystem;
-use Mine\Exception\NormalStatusException;
-use Mine\Generator\Traits\MapperGeneratorTraits;
-use Mine\Helper\Str;
+use Hyperf\Support\Filesystem\Filesystem;
+use MsPro\Exception\NormalStatusException;
+use MsPro\Generator\Traits\MapperGeneratorTraits;
+use MsPro\Helper\Str;
 
 /**
  * Mapper类生成
  * Class MapperGenerator
- * @package Mine\Generator
+ * @package MsPro\Generator
  */
-class MapperGenerator extends MineGenerator implements CodeGenerator
+class MapperGenerator extends MsProGenerator implements CodeGenerator
 {
     use MapperGeneratorTraits;
 

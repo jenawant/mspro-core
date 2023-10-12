@@ -3,23 +3,23 @@
 
 declare(strict_types=1);
 
-namespace Mine\Generator;
+namespace MsPro\Generator;
 
 use App\Setting\Model\SettingGenerateColumns;
 use App\Setting\Model\SettingGenerateTables;
 use App\System\Model\SystemMenu;
 use Hyperf\Di\Annotation\Inject;
-use Hyperf\Utils\Filesystem\Filesystem;
-use Mine\Exception\NormalStatusException;
-use Mine\Helper\Str;
+use Hyperf\Support\Filesystem\Filesystem;
+use MsPro\Exception\NormalStatusException;
+use MsPro\Helper\Str;
 use Hyperf\Database\Model\Collection;
 
 /**
  * React index文件生成
- * Class VueIndexGenerator
- * @package Mine\Generator
+ * Class ReactIndexGenerator
+ * @package MsPro\Generator
  */
-class ReactIndexGenerator extends MineGenerator implements CodeGenerator
+class ReactIndexGenerator extends MsProGenerator implements CodeGenerator
 {
     /**
      * @var SettingGenerateTables

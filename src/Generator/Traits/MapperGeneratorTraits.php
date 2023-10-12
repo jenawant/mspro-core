@@ -3,7 +3,7 @@
 
 declare(strict_types=1);
 
-namespace Mine\Generator\Traits;
+namespace MsPro\Generator\Traits;
 
 trait MapperGeneratorTraits
 {

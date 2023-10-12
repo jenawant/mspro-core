@@ -5,23 +5,23 @@
 
 declare(strict_types=1);
 
-namespace Mine\Generator;
+namespace MsPro\Generator;
 
 use App\Setting\Model\SettingGenerateTables;
 use App\Setting\Service\SettingGenerateColumnsService;
 use Hyperf\Database\Schema\Schema;
-use Hyperf\Utils\Filesystem\Filesystem;
-use Mine\Exception\NormalStatusException;
-use Mine\Helper\Str;
+use Hyperf\Support\Filesystem\Filesystem;
+use MsPro\Exception\NormalStatusException;
+use MsPro\Helper\Str;
 use Symfony\Component\Console\Input\ArrayInput;
 use Symfony\Component\Console\Output\NullOutput;
 
 /**
  * 模型生成
  * Class ModelGenerator
- * @package Mine\Generator
+ * @package MsPro\Generator
  */
-class ModelGenerator extends MineGenerator implements CodeGenerator
+class ModelGenerator extends MsProGenerator implements CodeGenerator
 {
     /**
      * @var SettingGenerateTables

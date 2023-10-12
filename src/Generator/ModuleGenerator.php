@@ -7,7 +7,7 @@ declare(strict_types=1);
 
 namespace MsPro\Generator;
 
-use Hyperf\Utils\Filesystem\Filesystem;
+use Hyperf\Support\Filesystem\Filesystem;
 use MsPro\MsPro;
 
 class ModuleGenerator extends MsProGenerator

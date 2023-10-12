@@ -4,10 +4,10 @@ declare (strict_types=1);
 namespace {NAMESPACE};
 
 {USE_CLASS}
-use Mine\MineModel;
+use MsPro\MsProModel;
 
 {PROPERTIES}
-class {CLASS_NAME} extends MineModel
+class {CLASS_NAME} extends MsProModel
 {
     {USE_PROPERTIES}
     /**

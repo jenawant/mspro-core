@@ -4,19 +4,19 @@
 
 
 declare(strict_types=1);
-namespace Mine\Generator;
+namespace MsPro\Generator;
 
 use App\Setting\Model\SettingGenerateTables;
-use Hyperf\Utils\Filesystem\Filesystem;
-use Mine\Exception\NormalStatusException;
-use Mine\Helper\Str;
+use Hyperf\Support\Filesystem\Filesystem;
+use MsPro\Exception\NormalStatusException;
+use MsPro\Helper\Str;
 
 /**
  * JS API文件生成
  * Class ApiGenerator
- * @package Mine\Generator
+ * @package MsPro\Generator
  */
-class ApiGenerator extends MineGenerator implements CodeGenerator
+class ApiGenerator extends MsProGenerator implements CodeGenerator
 {
     /**
      * @var SettingGenerateTables

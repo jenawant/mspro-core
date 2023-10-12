@@ -5,7 +5,7 @@ declare(strict_types=1);
 namespace MsPro\Command;
 
 use Hyperf\Command\Annotation\Command;
-use Hyperf\Utils\Filesystem\Filesystem;
+use Hyperf\Support\Filesystem\Filesystem;
 use MsPro\Exception\NormalStatusException;
 use MsPro\Helper\Str;
 use MsPro\MsProCommand;
