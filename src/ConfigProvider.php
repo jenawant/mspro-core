@@ -12,6 +12,9 @@ use MsPro\Annotation\DependProxyCollector;
 use MsPro\Translatable\Contracts\LocalesInterface;
 use MsPro\Translatable\Locales;
 
+use MsPro\Crontab\MsProCrontabProcess;
+use Hyperf\AsyncQueue\Process\ConsumerProcess;
+
 class ConfigProvider
 {
     public function __invoke(): array
@@ -19,8 +22,8 @@ class ConfigProvider
         return [
             // 合并到  config/autoload/processes.php 文件
             'processes' => [
-                MsPro\Crontab\MsProCrontabProcess::class,
-                Hyperf\AsyncQueue\Process\ConsumerProcess::class
+                MsProCrontabProcess::class,
+                ConsumerProcess::class
             ],
             // 合并到  config/autoload/dependencies.php 文件
             'dependencies' => [
