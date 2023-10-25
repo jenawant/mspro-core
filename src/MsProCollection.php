@@ -87,6 +87,7 @@ class MsProCollection extends Collection
      * @param string $dto
      * @param string $filename
      * @param array|\Closure|null $closure
+     * @param \Closure|null $callbackData
      * @return \Psr\Http\Message\ResponseInterface
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      * @throws \Psr\Container\ContainerExceptionInterface
@@ -94,7 +95,7 @@ class MsProCollection extends Collection
      */
     public function export(string $dto, string $filename, array|\Closure $closure = null, \Closure $callbackData = null): \Psr\Http\Message\ResponseInterface
     {
-        $excelDrive = config('msproadmin.excel_drive');
+        $excelDrive = \Hyperf\Config\config('msproadmin.excel_drive');
         if ($excelDrive === 'auto') {
             $excel = extension_loaded('xlswriter') ? new XlsWriter($dto) : new PhpOffice($dto);
         } else {
@@ -115,7 +116,7 @@ class MsProCollection extends Collection
      */
     public function import(string $dto, MsProModel $model, ?\Closure $closure = null): bool
     {
-        $excelDrive = config('msproadmin.excel_drive');
+        $excelDrive = \Hyperf\Config\config('msproadmin.excel_drive');
         if ($excelDrive === 'auto') {
             $excel = extension_loaded('xlswriter') ? new XlsWriter($dto) : new PhpOffice($dto);
         } else {

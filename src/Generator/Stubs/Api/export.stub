@@ -11,3 +11,26 @@
       params
     })
   },
+  /**
+   * {BUSINESS_NAME}异步导出
+   * @returns
+   */
+  asyncExportExcel (params = {}) {
+    return request({
+      url: '{REQUEST_ROUTE}/asyncExport',
+      method: 'post',
+      params
+    })
+  },
+  /**
+   * {BUSINESS_NAME}下载异步导出的文件
+   * @returns
+   */
+  asyncDownloadExcel (params = {}) {
+    return request({
+      url: '{REQUEST_ROUTE}/asyncDownload',
+      method: 'get',
+      responseType: 'blob',
+      params
+    })
+  },

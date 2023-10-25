@@ -5,7 +5,12 @@
 
 namespace MsPro\Traits;
 
+use Hyperf\AsyncQueue\Annotation\AsyncQueueMessage;
 use Hyperf\Database\Model\Collection;
+use Hyperf\HttpMessage\Stream\SwooleStream;
+use MsPro\Exception\NormalStatusException;
+use MsPro\Office\Excel\PhpOffice;
+use MsPro\Office\Excel\XlsWriter;
 use MsPro\Abstracts\AbstractMapper;
 use MsPro\Annotation\Transaction;
 use MsPro\MsProCollection;
@@ -262,7 +267,7 @@ trait ServiceTrait
      */
     public function changeStatus(int $id, string $value, string $filed = 'status'): bool
     {
-        return $value == MsProModel::ENABLE ? $this->mapper->enable([ $id ], $filed) : $this->mapper->disable([ $id ], $filed);
+        return $value == MsProModel::ENABLE ? $this->mapper->enable([$id], $filed) : $this->mapper->disable([$id], $filed);
     }
 
     /**
@@ -282,6 +287,7 @@ trait ServiceTrait
      * @param array $params
      * @param string|null $dto
      * @param string|null $filename
+     * @param \Closure|null $callbackData
      * @return ResponseInterface
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
      * @throws \Psr\Container\ContainerExceptionInterface
@@ -298,6 +304,92 @@ trait ServiceTrait
         }
 
         return (new MsProCollection())->export($dto, $filename, $this->mapper->getList($params), $callbackData);
+    }
+
+    /**
+     * 异步导出
+     * @param array $params
+     * @param string $dto
+     * @param string $filename
+     * @param \Closure|null $closure
+     * @param bool $column_adapter
+     * @param int $row_size
+     * @return void
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    #[AsyncQueueMessage]
+    public function asyncExport(array $params, string $dto, string $filename, \Closure $closure = null, bool $column_adapter = false, int $row_size = 150000): void
+    {
+        $folder = BASE_PATH . '/runtime/export/';
+        if (!is_dir($folder)) {
+            mkdir($folder, '0774', true);
+        }
+
+        $files      = [];
+        $index      = 0;
+        $excelDrive = \Hyperf\Config\config('msproadmin.excel_drive');
+        if ($excelDrive === 'auto') {
+            $excel = extension_loaded('xlswriter') ? new XlsWriter($dto) : new PhpOffice($dto);
+        } else {
+            $excel = $excelDrive === 'xlsWriter' ? new XlsWriter($dto) : new PhpOffice($dto);
+        }
+
+        $this->mapper->listQuerySetting($params, false)
+            ->chunk($row_size, function ($data) use (&$index, $filename, &$files, $excel, $closure, $column_adapter, $folder) {
+                $index++;
+                $files[] = $excel->create($filename . '_' . $index, $data->toArray(), $closure, $column_adapter, $folder);
+                unset($data);
+            });
+
+        $zip     = new \ZipArchive();
+        $zipFile = $folder . $filename . '.zip';
+        $zip->open($zipFile, \ZipArchive::CREATE | \ZipArchive::OVERWRITE);
+        foreach ($files as $file) {
+            $zip->addFile($file, pathinfo($file, PATHINFO_BASENAME));
+        }
+        $zip->close();
+        foreach ($files as $file) {
+            @unlink($file);
+        }
+    }
+
+    /**
+     * @param string $filename
+     * @return ResponseInterface
+     * @throws \Psr\Container\ContainerExceptionInterface
+     * @throws \Psr\Container\NotFoundExceptionInterface
+     */
+    public function asyncDownload(string $filename): \Psr\Http\Message\ResponseInterface
+    {
+        $folder = BASE_PATH . '/runtime/export/';
+        $file   = $folder . $filename . '.zip';
+
+        if (!is_file($file)) {
+            throw new NormalStatusException('处理中，请稍候', 10002);
+        }
+
+        $response = container()->get(MsProResponse::class);
+
+        ob_start();
+        if (copy($file, 'php://output') === false) {
+            throw new NormalStatusException('导出数据失败', 10003);
+        }
+
+        $res = $response->getResponse()
+            ->withHeader('Server', 'MsProAdmin')
+            ->withHeader('content-description', 'File Transfer')
+            ->withHeader('content-type', 'application/zip')
+            ->withHeader('content-disposition', "attachment; filename={$filename}.zip; filename*=UTF-8''" . rawurlencode($filename . '.zip'))
+            ->withHeader('content-transfer-encoding', 'binary')
+            ->withHeader('pragma', 'public')
+            ->withBody(new SwooleStream(ob_get_contents()));
+
+        ob_end_clean();
+        @unlink($file);
+
+        return $res;
     }
 
     /**
@@ -326,24 +418,24 @@ trait ServiceTrait
         $collect = $this->handleArraySearch(collect($this->getArrayData($params)), $params);
 
         $pageSize = MsProModel::PAGE_SIZE;
-        $page = 1;
+        $page     = 1;
 
         if ($params[$pageName] ?? false) {
-            $page = (int) $params[$pageName];
+            $page = (int)$params[$pageName];
         }
 
         if ($params['pageSize'] ?? false) {
-            $pageSize = (int) $params['pageSize'];
+            $pageSize = (int)$params['pageSize'];
         }
 
         $data = $collect->forPage($page, $pageSize)->toArray();
 
         return [
-            'items' => $this->getCurrentArrayPageBefore($data, $params),
+            'items'    => $this->getCurrentArrayPageBefore($data, $params),
             'pageInfo' => [
-                'total' => $collect->count(),
+                'total'       => $collect->count(),
                 'currentPage' => $page,
-                'totalPage' => ceil($collect->count() / $pageSize)
+                'totalPage'   => ceil($collect->count() / $pageSize)
             ]
         ];
     }

@@ -14,28 +14,39 @@ declare(strict_types=1);
 
 namespace MsPro\Office\Excel;
 
+use Closure;
+use Generator;
 use MsPro\Exception\MsProException;
+use MsPro\MsProModel;
+use MsPro\MsProRequest;
 use MsPro\Office\ExcelPropertyInterface;
 use MsPro\Office\MsProExcel;
 use PhpOffice\PhpSpreadsheet\IOFactory;
+use PhpOffice\PhpSpreadsheet\Reader\Exception;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Color;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use Psr\Container\ContainerExceptionInterface;
+use Psr\Container\NotFoundExceptionInterface;
+use Psr\Http\Message\ResponseInterface;
+use RuntimeException;
+use Throwable;
 
 class PhpOffice extends MsProExcel implements ExcelPropertyInterface
 {
 
     /**
      * 导入
-     * @param \MsPro\MsProModel $model
-     * @param \Closure|null $closure
+     * @param MsProModel $model
+     * @param Closure|null $closure
      * @return bool
-     * @throws \PhpOffice\PhpSpreadsheet\Reader\Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
+     * @throws Exception
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      */
-    public function import(\MsPro\MsProModel $model, ?\Closure $closure = null): bool
+    public function import(MsProModel $model, ?Closure $closure = null): bool
     {
-        $request = container()->get(\MsPro\MsProRequest::class);
+        $request = container()->get(MsProRequest::class);
         $data = [];
         if ($request->hasFile('file')) {
             $file = $request->file('file');
@@ -60,14 +71,14 @@ class PhpOffice extends MsProExcel implements ExcelPropertyInterface
                     }
                 }
                 unlink($tempFilePath);
-            } catch (\Throwable $e) {
+            } catch (Throwable $e) {
                 unlink($tempFilePath);
                 throw new MsProException($e->getMessage());
             }
         } else {
             return false;
         }
-        if ($closure instanceof \Closure) {
+        if ($closure instanceof Closure) {
             return $closure($model, $data);
         }
 
@@ -77,20 +88,53 @@ class PhpOffice extends MsProExcel implements ExcelPropertyInterface
         return true;
     }
 
+
     /**
      * 导出
      * @param string $filename
-     * @param array|\Closure $closure
-     * @return \Psr\Http\Message\ResponseInterface
+     * @param array|Closure $closure
+     * @param Closure|null $callbackData
+     * @param bool $column_adapter
+     * @return ResponseInterface
+     * @throws ContainerExceptionInterface
+     * @throws NotFoundExceptionInterface
      * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
-     * @throws \Psr\Container\ContainerExceptionInterface
-     * @throws \Psr\Container\NotFoundExceptionInterface
      */
-    public function export(string $filename, array|\Closure $closure, \Closure $callbackData = null): \Psr\Http\Message\ResponseInterface
+    public function export(string $filename, array|Closure $closure, Closure $callbackData = null, bool $column_adapter = false): ResponseInterface
+    {
+        $file = $this->create($filename, $closure, $callbackData, $column_adapter);
+
+        ob_start();
+        if (copy($file, 'php://output') === false) {
+            throw new MsProException('文件读取失败');
+        }
+        $res = $this->downloadExcel($filename, ob_get_contents());
+        ob_end_clean();
+        @unlink($file);
+
+        return $res;
+    }
+
+
+    /**
+     * 生成文件
+     * @param string $filename
+     * @param array|Closure $closure
+     * @param Closure|null $callbackData
+     * @param bool $column_adapter
+     * @param string $folder
+     * @return string
+     * @throws \PhpOffice\PhpSpreadsheet\Writer\Exception
+     */
+    public function create(string $filename, array|Closure $closure, Closure $callbackData = null, bool $column_adapter = false, string $folder = BASE_PATH . '/runtime/export'): string
     {
         $spread = new Spreadsheet();
-        $sheet  = $spread->getActiveSheet();
+        $sheet = $spread->getActiveSheet();
         $filename .= '.xlsx';
+
+        if (!is_dir($folder)){
+            mkdir($folder, 0774, true);
+        }
 
         is_array($closure) ? $data = &$closure : $data = $closure();
 
@@ -110,13 +154,13 @@ class PhpOffice extends MsProExcel implements ExcelPropertyInterface
 
             if (!empty($item['headBgColor'])) {
                 $sheet->getStyle($headerColumn)->getFill()
-                    ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                    ->setFillType(Fill::FILL_SOLID)
                     ->getStartColor()->setARGB(str_replace('#', '', $item['headBgColor']));
             }
             $titleStart++;
         }
 
-        $generate = $this->yieldExcelData($data);
+        $generate = $this->yieldExcelData($data, $callbackData);
 
         // 表体
         try {
@@ -137,7 +181,7 @@ class PhpOffice extends MsProExcel implements ExcelPropertyInterface
                     if (!empty($annotation['dictName'])) {
                         $sheet->setCellValue($columnRow, $annotation['dictName'][$value]);
                     } else if (!empty($annotation['path'])){
-                        $sheet->setCellValue($columnRow, data_get($items, $annotation['path']));
+                        $sheet->setCellValue($columnRow, \Hyperf\Collection\data_get($items, $annotation['path']));
                     } else if (!empty($annotation['dictData'])) {
                         $sheet->setCellValue($columnRow, $annotation['dictData'][$value]);
                     } else if(!empty($this->dictData[$name])){
@@ -153,7 +197,7 @@ class PhpOffice extends MsProExcel implements ExcelPropertyInterface
 
                     if (! empty($item['bgColor'])) {
                         $sheet->getStyle($columnRow)->getFill()
-                            ->setFillType(\PhpOffice\PhpSpreadsheet\Style\Fill::FILL_SOLID)
+                            ->setFillType(Fill::FILL_SOLID)
                             ->getStartColor()->setARGB(str_replace('#', '', $annotation['bgColor']));
                     }
                     $column++;
@@ -161,22 +205,30 @@ class PhpOffice extends MsProExcel implements ExcelPropertyInterface
                 $generate->next();
                 $row++;
             }
-        } catch (\RuntimeException $e) {}
+        } catch (RuntimeException $e) {}
 
         $writer = IOFactory::createWriter($spread, 'Xlsx');
-        ob_start();
-        $writer->save('php://output');
-        $res = $this->downloadExcel($filename, ob_get_contents());
-        ob_end_clean();
+        $file = $folder . $filename;
+        $writer->save($file);
         $spread->disconnectWorksheets();
 
-        return $res;
+        unset($data);
+
+        return $file;
     }
 
-    protected function yieldExcelData(array &$data): \Generator
+    /**
+     * @param array $data
+     * @param Closure|null $callbackData
+     * @return Generator
+     */
+    protected function yieldExcelData(array $data, Closure $callbackData = null): Generator
     {
         foreach ($data as $dat) {
             $yield = [];
+            if ($callbackData) {
+                $dat = $callbackData($dat);
+            }
             foreach ($this->property as $item) {
                 $yield[ $item['name'] ] = $dat[$item['name']] ?? '';
             }
