@@ -31,6 +31,7 @@
       url: '{REQUEST_ROUTE}/asyncDownload',
       method: 'get',
       responseType: 'blob',
+      getResponse: true,
       params
     })
   },
