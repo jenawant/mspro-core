@@ -216,53 +216,53 @@ class InstallProjectCommand extends MsProCommand
     protected function generatorEnvFile()
     {
         try {
-            $env                                 = parse_ini_file(BASE_PATH . '/.env.example', true);
-            $env['APP']['APP_NAME']              = 'MsProAdmin';
-            $env['APP']['APP_ENV']               = 'dev';
-            $env['WEB']['WEB_HOST']              = 'https://www.yourdomain.com';
-            $env['PORT']['HTTP_SERVER_PORT']     = $this->port['http'];
-            $env['PORT']['MESSAGE_SERVER_PORT']  = $this->port['message'];
-            $env['DB']['DB_DRIVER']              = 'mysql';
-            $env['DB']['DB_HOST']                = $this->database['dbhost'];
-            $env['DB']['DB_PORT']                = $this->database['dbport'];
-            $env['DB']['DB_DATABASE']            = $this->database['dbname'];
-            $env['DB']['DB_USERNAME']            = $this->database['dbuser'];
-            $env['DB']['DB_PASSWORD']            = $this->database['dbpass'];
-            $env['DB']['DB_CHARSET']             = $this->database['charset'];
-            $env['DB']['DB_COLLATION']           = sprintf('%s_general_ci', $this->database['charset']);
-            $env['DB']['DB_PREFIX']              = $this->database['prefix'];
-            $env['REDIS']['REDIS_HOST']          = $this->redis['host'];
-            $env['REDIS']['REDIS_AUTH']          = $this->redis['auth'];
-            $env['REDIS']['REDIS_PORT']          = $this->redis['port'];
-            $env['REDIS']['REDIS_DB']            = (string)$this->redis['db'];
-            $env['AMQP']['AMQP_HOST']            = '127.0.0.7';
-            $env['AMQP']['AMQP_PORT']            = '5672';
-            $env['AMQP']['AMQP_USER']            = 'guest';
-            $env['AMQP']['AMQP_PASSWORD']        = 'guest';
-            $env['AMQP']['AMQP_VHOST']           = '/';
-            $env['AMQP']['AMQP_ENABLE']          = 'false';
-            $env['SYSTEM']['SUPER_ADMIN']        = 1;
-            $env['SYSTEM']['ADMIN_ROLE']         = 1;
-            $env['SYSTEM']['CONSOLE_SQL']        = 'true';
-            $env['JWT']['JWT_SECRET']            = base64_encode(random_bytes(64));
-            $env['JWT']['JWT_API_SECRET']        = base64_encode(random_bytes(64));
-            $env['MAIL']['MAIL_MAILER']          = 'smtp';
-            $env['MAIL']['MAIL_SMTP_HOST']       = 'smtpdm.aliyun.com';
-            $env['MAIL']['MAIL_SMTP_PORT']       = 465;
-            $env['MAIL']['MAIL_SMTP_USERNAME']   = 'service@your.domain.com';
-            $env['MAIL']['MAIL_SMTP_PASSWORD']   = 'ukxxxxxxxxxxxg3i7';
-            $env['MAIL']['MAIL_SMTP_ENCRYPTION'] = 'SSL';
-            $env['MAIL']['MAIL_SMTP_TIMEOUT']    = 'NULL';
-            $env['MAIL']['MAIL_SMTP_AUTH_MODE']  = 'NULL';
-            $env['MAIL']['MAIL_FROM_ADDRESS']    = 'service@your.domain.com';
-            $env['MAIL']['MAIL_FROM_NAME']       = 'MsProAdmin';
+            $env                         = parse_ini_file(BASE_PATH . '/.env.example', true);
+            $env['APP_NAME']             = 'MsProAdmin';
+            $env['APP_ENV']              = 'dev' . PHP_EOL;
+            $env['WEB_HOST']             = 'https://www.yourdomain.com' . PHP_EOL;
+            $env['HTTP_SERVER_PORT']     = $this->port['http'];
+            $env['MESSAGE_SERVER_PORT']  = $this->port['message'] . PHP_EOL;
+            $env['DB_DRIVER']            = 'mysql';
+            $env['DB_HOST']              = $this->database['dbhost'];
+            $env['DB_PORT']              = $this->database['dbport'];
+            $env['DB_DATABASE']          = $this->database['dbname'];
+            $env['DB_USERNAME']          = $this->database['dbuser'];
+            $env['DB_PASSWORD']          = $this->database['dbpass'];
+            $env['DB_CHARSET']           = $this->database['charset'];
+            $env['DB_COLLATION']         = sprintf('%s_general_ci', $this->database['charset']);
+            $env['DB_PREFIX']            = $this->database['prefix'] . PHP_EOL;
+            $env['REDIS_HOST']           = $this->redis['host'];
+            $env['REDIS_AUTH']           = $this->redis['auth'];
+            $env['REDIS_PORT']           = $this->redis['port'];
+            $env['REDIS_DB']             = (string)$this->redis['db'];
+            $env['AMQP_HOST']            = '127.0.0.7';
+            $env['AMQP_PORT']            = '5672';
+            $env['AMQP_USER']            = 'guest';
+            $env['AMQP_PASSWORD']        = 'guest';
+            $env['AMQP_VHOST']           = '/';
+            $env['AMQP_ENABLE']          = 'false' . PHP_EOL;
+            $env['SUPER_ADMIN']          = 1;
+            $env['ADMIN_ROLE']           = 1;
+            $env['CONSOLE_SQL']          = 'true' . PHP_EOL;
+            $env['JWT_SECRET']           = base64_encode(random_bytes(64));
+            $env['JWT_API_SECRET']       = base64_encode(random_bytes(64)) . PHP_EOL;
+            $env['MAIL_MAILER']          = 'smtp';
+            $env['MAIL_SMTP_HOST']       = 'smtpdm.aliyun.com';
+            $env['MAIL_SMTP_PORT']       = 465;
+            $env['MAIL_SMTP_USERNAME']   = 'service@your.domain.com';
+            $env['MAIL_SMTP_PASSWORD']   = 'ukxxxxxxxxxxxg3i7';
+            $env['MAIL_SMTP_ENCRYPTION'] = 'SSL';
+            $env['MAIL_SMTP_TIMEOUT']    = 'NULL';
+            $env['MAIL_SMTP_AUTH_MODE']  = 'NULL';
+            $env['MAIL_FROM_ADDRESS']    = 'service@your.domain.com';
+            $env['MAIL_FROM_NAME']       = 'MsProAdmin';
 
             $id = null;
 
             $envContent = '';
             foreach ($env as $key => $e) {
                 if (!is_array($e)) {
-                    $envContent .= sprintf('%s=%s', $key, $e === '1' ? 'true' : ($e === '' ? '' : $e)) . PHP_EOL . PHP_EOL;
+                    $envContent .= sprintf('%s=%s', $key, $e === '1' ? 'true' : ($e === '' ? '' : $e)) . PHP_EOL;
                 } else {
                     $envContent .= sprintf('[%s]', $key) . PHP_EOL;
                     foreach ($e as $k => $v) {
