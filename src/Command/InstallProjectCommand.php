@@ -10,6 +10,7 @@ namespace MsPro\Command;
 
 use Hyperf\Command\Annotation\Command;
 use Hyperf\DbConnection\Db;
+use MsPro\Helper\Str;
 use MsPro\MsProCommand;
 use MsPro\MsPro;
 use Symfony\Component\Console\Input\InputOption;
@@ -34,6 +35,10 @@ class InstallProjectCommand extends MsProCommand
     protected array $database = [];
 
     protected array $redis = [];
+
+    protected array $port = [];
+
+    protected string $init_password = '';
 
 
     public function configure()
@@ -61,7 +66,7 @@ class InstallProjectCommand extends MsProCommand
                 $this->checkEnv();
 
                 // 设置数据库
-                $this->setDataBaseInformationAndRedis();
+                $this->setDataBaseInformationAndRedisAndPort();
 
                 $this->line("\n\nReset the \".env\" file. Please restart the service before running \nthe installation command to continue the installation.", "info");
             } else if (file_exists(BASE_PATH . '/.env') && $this->confirm('Do you want to continue with the installation program?', true)) {
@@ -83,7 +88,7 @@ class InstallProjectCommand extends MsProCommand
                 $this->checkEnv();
 
                 // 设置数据库
-                $this->setDataBaseInformationAndRedis();
+                $this->setDataBaseInformationAndRedisAndPort();
 
                 // 安装本地模块
                 $this->installLocalModule();
@@ -135,7 +140,7 @@ class InstallProjectCommand extends MsProCommand
     /**
      * @throws \Exception
      */
-    protected function setDataBaseInformationAndRedis(): void
+    protected function setDataBaseInformationAndRedisAndPort(): void
     {
         $dbAnswer = $this->confirm('Do you need to set Database information?', true);
         // 设置数据库
@@ -190,6 +195,18 @@ class InstallProjectCommand extends MsProCommand
             ];
         }
 
+        $portAnswer = $this->confirm('Do you need to set Server Port?', true);
+        // 设置Port
+        if ($portAnswer) {
+            $httpPort    = $this->ask('please input HTTP server port, default:', '9501');
+            $messagePort = $this->ask('please input MESSAGE server port, default:', '9502');
+
+            $this->port = [
+                'http'    => $httpPort,
+                'message' => $messagePort,
+            ];
+        }
+
         $dbAnswer && $this->generatorEnvFile();
     }
 
@@ -199,50 +216,63 @@ class InstallProjectCommand extends MsProCommand
     protected function generatorEnvFile()
     {
         try {
-            $env = parse_ini_file(BASE_PATH . '/.env.example', true);
-            $env['APP_NAME'] = 'MsProAdmin';
-            $env['APP_ENV'] = 'dev';
-            $env['DB_DRIVER'] = 'mysql';
-            $env['DB_HOST'] = $this->database['dbhost'];
-            $env['DB_PORT'] = $this->database['dbport'];
-            $env['DB_DATABASE'] = $this->database['dbname'];
-            $env['DB_USERNAME'] = $this->database['dbuser'];
-            $env['DB_PASSWORD'] = $this->database['dbpass'];
-            $env['DB_CHARSET'] = $this->database['charset'];
-            $env['DB_COLLATION'] = sprintf('%s_general_ci', $this->database['charset']);
-            $env['DB_PREFIX'] = $this->database['prefix'];
-            $env['REDIS_HOST'] = $this->redis['host'];
-            $env['REDIS_AUTH'] = $this->redis['auth'];
-            $env['REDIS_PORT'] = $this->redis['port'];
-            $env['REDIS_DB'] = (string) $this->redis['db'];
-            $env['AMQP_HOST'] = '127.0.0.7';
-            $env['AMQP_PORT'] = '5672';
-            $env['AMQP_USER'] = 'guest';
-            $env['AMQP_PASSWORD'] = 'guest';
-            $env['AMQP_VHOST'] = '/';
-            $env['AMQP_ENABLE'] = 'false';
-            $env['SUPER_ADMIN'] = 1;
-            $env['ADMIN_ROLE'] = 1;
-            $env['CONSOLE_SQL'] = 'true';
-            $env['JWT_SECRET'] = base64_encode(random_bytes(64));
-            $env['JWT_API_SECRET'] = base64_encode(random_bytes(64));
+            $env                                 = parse_ini_file(BASE_PATH . '/.env.example', true);
+            $env['APP']['APP_NAME']              = 'MsProAdmin';
+            $env['APP']['APP_ENV']               = 'dev';
+            $env['WEB']['WEB_HOST']              = 'https://www.yourdomain.com';
+            $env['PORT']['HTTP_SERVER_PORT']     = $this->port['http'];
+            $env['PORT']['MESSAGE_SERVER_PORT']  = $this->port['message'];
+            $env['DB']['DB_DRIVER']              = 'mysql';
+            $env['DB']['DB_HOST']                = $this->database['dbhost'];
+            $env['DB']['DB_PORT']                = $this->database['dbport'];
+            $env['DB']['DB_DATABASE']            = $this->database['dbname'];
+            $env['DB']['DB_USERNAME']            = $this->database['dbuser'];
+            $env['DB']['DB_PASSWORD']            = $this->database['dbpass'];
+            $env['DB']['DB_CHARSET']             = $this->database['charset'];
+            $env['DB']['DB_COLLATION']           = sprintf('%s_general_ci', $this->database['charset']);
+            $env['DB']['DB_PREFIX']              = $this->database['prefix'];
+            $env['REDIS']['REDIS_HOST']          = $this->redis['host'];
+            $env['REDIS']['REDIS_AUTH']          = $this->redis['auth'];
+            $env['REDIS']['REDIS_PORT']          = $this->redis['port'];
+            $env['REDIS']['REDIS_DB']            = (string)$this->redis['db'];
+            $env['AMQP']['AMQP_HOST']            = '127.0.0.7';
+            $env['AMQP']['AMQP_PORT']            = '5672';
+            $env['AMQP']['AMQP_USER']            = 'guest';
+            $env['AMQP']['AMQP_PASSWORD']        = 'guest';
+            $env['AMQP']['AMQP_VHOST']           = '/';
+            $env['AMQP']['AMQP_ENABLE']          = 'false';
+            $env['SYSTEM']['SUPER_ADMIN']        = 1;
+            $env['SYSTEM']['ADMIN_ROLE']         = 1;
+            $env['SYSTEM']['CONSOLE_SQL']        = 'true';
+            $env['JWT']['JWT_SECRET']            = base64_encode(random_bytes(64));
+            $env['JWT']['JWT_API_SECRET']        = base64_encode(random_bytes(64));
+            $env['MAIL']['MAIL_MAILER']          = 'smtp';
+            $env['MAIL']['MAIL_SMTP_HOST']       = 'smtpdm.aliyun.com';
+            $env['MAIL']['MAIL_SMTP_PORT']       = 465;
+            $env['MAIL']['MAIL_SMTP_USERNAME']   = 'service@your.domain.com';
+            $env['MAIL']['MAIL_SMTP_PASSWORD']   = 'ukxxxxxxxxxxxg3i7';
+            $env['MAIL']['MAIL_SMTP_ENCRYPTION'] = 'SSL';
+            $env['MAIL']['MAIL_SMTP_TIMEOUT']    = 'NULL';
+            $env['MAIL']['MAIL_SMTP_AUTH_MODE']  = 'NULL';
+            $env['MAIL']['MAIL_FROM_ADDRESS']    = 'service@your.domain.com';
+            $env['MAIL']['MAIL_FROM_NAME']       = 'MsProAdmin';
 
             $id = null;
 
             $envContent = '';
             foreach ($env as $key => $e) {
                 if (!is_array($e)) {
-                    $envContent .= sprintf('%s = %s', $key, $e === '1' ? 'true' : ($e === '' ? '' : $e)) . PHP_EOL . PHP_EOL;
+                    $envContent .= sprintf('%s=%s', $key, $e === '1' ? 'true' : ($e === '' ? '' : $e)) . PHP_EOL . PHP_EOL;
                 } else {
                     $envContent .= sprintf('[%s]', $key) . PHP_EOL;
                     foreach ($e as $k => $v) {
-                        $envContent .= sprintf('%s = %s', $k, $v === '1' ? 'true' : ($v === '' ? '' : $v)) . PHP_EOL;
+                        $envContent .= sprintf('%s=%s', $k, $v === '1' ? 'true' : ($v === '' ? '' : $v)) . PHP_EOL;
                     }
                     $envContent .= PHP_EOL;
                 }
             }
-            $dsn = sprintf("mysql:host=%s;port=%s", $this->database['dbhost'], $this->database['dbport']);
-            $pdo = new \PDO($dsn, $this->database['dbuser'], $this->database['dbpass']);
+            $dsn       = sprintf("mysql:host=%s;port=%s", $this->database['dbhost'], $this->database['dbport']);
+            $pdo       = new \PDO($dsn, $this->database['dbuser'], $this->database['dbpass']);
             $isSuccess = $pdo->query(
                 sprintf(
                     'CREATE DATABASE IF NOT EXISTS `%s` DEFAULT CHARSET %s COLLATE %s_general_ci;',
@@ -273,14 +303,14 @@ class InstallProjectCommand extends MsProCommand
     {
         /* @var MsPro $mspro */
         $this->line("Installation of local modules is about to begin...\n", 'comment');
-        $mspro = make(MsPro::class);
+        $mspro   = \Hyperf\Support\make(MsPro::class);
         $modules = $mspro->getModuleInfo();
         foreach ($modules as $name => $info) {
             $this->call('mspro:migrate-run', ['name' => $name, '--force' => 'true']);
             if ($name === 'System') {
                 $this->initUserData();
             }
-            $this->call('mspro:seeder-run',  ['name' => $name, '--force' => 'true']);
+            $this->call('mspro:seeder-run', ['name' => $name, '--force' => 'true']);
             $this->line($this->getGreenText(sprintf('"%s" module install successfully', $name)));
         }
     }
@@ -289,14 +319,14 @@ class InstallProjectCommand extends MsProCommand
     {
         $this->line(PHP_EOL . ' MsProAdmin set others items...' . PHP_EOL, 'comment');
         $this->call('mspro:update');
-        $this->call('mspro:jwt-gen', [ '--jwtSecret' => 'JWT_SECRET' ]);
-        $this->call('mspro:jwt-gen', [ '--jwtSecret' => 'JWT_API_SECRET' ]);
+        $this->call('mspro:jwt-gen', ['--jwtSecret' => 'JWT_SECRET']);
+        $this->call('mspro:jwt-gen', ['--jwtSecret' => 'JWT_API_SECRET']);
 
-        if (! file_exists(BASE_PATH . '/config/autoload/msproadmin.php')) {
-            $this->call('vendor:publish', [ 'package' => 'jenawant/mspro-core' ]);
+        if (!file_exists(BASE_PATH . '/config/autoload/msproadmin.php')) {
+            $this->call('vendor:publish', ['package' => 'jenawant/mspro-core']);
         }
-        if (! file_exists(BASE_PATH . '/config/autoload/mail.php')) {
-            $this->call('vendor:publish', [ 'package' => 'jenawant/mspro-mail' ]);
+        if (!file_exists(BASE_PATH . '/config/autoload/mail.php')) {
+            $this->call('vendor:publish', ['package' => 'jenawant/mspro-mail']);
         }
 
         $downloadFrontCode = $this->confirm('Do you downloading the front-end code to "./web" directory?', true);
@@ -314,6 +344,7 @@ class InstallProjectCommand extends MsProCommand
 
     protected function initUserData()
     {
+        $this->init_password = Str::random(8);
         // 清理数据
         Db::table('system_user')->truncate();
         Db::table('system_role')->truncate();
@@ -324,38 +355,38 @@ class InstallProjectCommand extends MsProCommand
 
         // 创建超级管理员
         Db::table("system_user")->insert([
-            'id' => env('SUPER_ADMIN', 1),
-            'username' => 'administrator',
-            'password' => password_hash('111111', PASSWORD_DEFAULT),
-            'user_type' => '100',
-            'nickname' => '创始人',
-            'email' => 'admin@msproadmin.com',
-            'phone' => '18566667777',
-            'signed' => '广阔天地，大有所为',
-            'dashboard' => 'statistics',
+            'id'         => \Hyperf\Support\env('SUPER_ADMIN', 1),
+            'username'   => 'administrator',
+            'password'   => password_hash($this->init_password, PASSWORD_DEFAULT),
+            'user_type'  => '100',
+            'nickname'   => '创始人',
+            'email'      => 'admin@msproadmin.com',
+            'phone'      => '18566667777',
+            'signed'     => '广阔天地，大有所为',
+            'dashboard'  => 'statistics',
             'created_by' => 0,
             'updated_by' => 0,
-            'status' => 1,
+            'status'     => 1,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s')
         ]);
         // 创建管理员角色
         Db::table('system_role')->insert([
-            'id' => env('ADMIN_ROLE', 1),
-            'name' => '超级管理员（创始人）',
-            'code' => 'superAdmin',
+            'id'         => \Hyperf\Support\env('ADMIN_ROLE', 1),
+            'name'       => '超级管理员（创始人）',
+            'code'       => 'superAdmin',
             'data_scope' => 0,
-            'sort' => 0,
-            'created_by' => env('SUPER_ADMIN', 0),
+            'sort'       => 0,
+            'created_by' => \Hyperf\Support\env('SUPER_ADMIN', 0),
             'updated_by' => 0,
-            'status' => 1,
+            'status'     => 1,
             'created_at' => date('Y-m-d H:i:s'),
             'updated_at' => date('Y-m-d H:i:s'),
-            'remark' => '系统内置角色，不可删除'
+            'remark'     => '系统内置角色，不可删除'
         ]);
         Db::table('system_user_role')->insert([
-            'user_id' => env('SUPER_ADMIN', 1),
-            'role_id' => env('ADMIN_ROLE', 1)
+            'user_id' => \Hyperf\Support\env('SUPER_ADMIN', 1),
+            'role_id' => \Hyperf\Support\env('ADMIN_ROLE', 1)
         ]);
     }
 
@@ -371,7 +402,7 @@ class InstallProjectCommand extends MsProCommand
         $this->line(PHP_EOL . sprintf('%s
 MsProAdmin Version: %s
 default username: administrator
-default password: 111111', $this->getInfo(), MsPro::getVersion()), 'comment');
+default password: %s', $this->getInfo(), MsPro::getVersion(), $this->init_password), 'comment');
     }
 
     /**
