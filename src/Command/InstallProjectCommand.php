@@ -234,8 +234,8 @@ class InstallProjectCommand extends MsProCommand
             $env['REDIS_HOST']           = $this->redis['host'];
             $env['REDIS_AUTH']           = $this->redis['auth'];
             $env['REDIS_PORT']           = $this->redis['port'];
-            $env['REDIS_DB']             = (string)$this->redis['db'];
-            $env['AMQP_HOST']            = '127.0.0.7';
+            $env['REDIS_DB']             = $this->redis['db']. PHP_EOL;
+            $env['AMQP_HOST']            = '127.0.0.1';
             $env['AMQP_PORT']            = '5672';
             $env['AMQP_USER']            = 'guest';
             $env['AMQP_PASSWORD']        = 'guest';

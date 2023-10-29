@@ -15,7 +15,7 @@ class MsPro
     /**
      * @var string
      */
-    private static string $version = '1.0.7';
+    private static string $version = '1.0.13';
 
     /**
      * @var string
