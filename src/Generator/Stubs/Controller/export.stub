@@ -24,7 +24,7 @@
     public function asyncExport(): ResponseInterface
     {
         $filename = 'ExportDataList-' . date('Ymd') . '-' . snowflake_id();
-        $this->service->asyncExport($this->request->all(), {DTO_CLASS}, $filename);
+        $this->asyncExport->create({SERVICE_CLASS}, {DTO_CLASS}, $this->request->all(), $filename);
         return $this->success('已加入导出队列，请稍后', ['filename' => $filename]);
     }
 
@@ -39,5 +39,5 @@
     #[GetMapping("asyncDownload"), Permission("{EXPORT_PERMISSION}")]
     public function asyncDownload(): ResponseInterface
     {
-        return $this->service->asyncDownload($this->request->input('filename'));
+        return $this->asyncExport->download($this->request->input('filename'));
     }

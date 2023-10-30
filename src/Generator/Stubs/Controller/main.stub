@@ -18,6 +18,7 @@ use MsPro\Annotation\RemoteState;
 use MsPro\Annotation\OperationLog;
 use MsPro\Annotation\Permission;
 use MsPro\MsProController;
+{USE_ASYNC_EXPORT}
 use Psr\Http\Message\ResponseInterface;
 
 /**
@@ -33,6 +34,7 @@ class {CLASS_NAME} extends MsProController
      */
     #[Inject]
     protected {SERVICE} $service;
+    {INJECT_ASYNC_EXPORT}
 
     {FUNCTIONS}
 

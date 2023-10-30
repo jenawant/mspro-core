@@ -1,0 +1,7 @@
+
+    /**
+     * 业务处理服务
+     * {SERVICE}
+     */
+    #[Inject]
+    protected AsyncExport $asyncExport;

@@ -7,6 +7,7 @@
  */
 
 declare(strict_types=1);
+
 namespace MsPro\Generator;
 
 use App\Setting\Model\SettingGenerateColumns;
@@ -46,7 +47,7 @@ class ControllerGenerator extends MsProGenerator implements CodeGenerator
      */
     public function setGenInfo(SettingGenerateTables $model): ControllerGenerator
     {
-        $this->model = $model;
+        $this->model      = $model;
         $this->filesystem = make(Filesystem::class);
         if (empty($model->module_name) || empty($model->menu_name)) {
             throw new NormalStatusException(t('setting.gen_code_edit'));
@@ -131,8 +132,10 @@ class ControllerGenerator extends MsProGenerator implements CodeGenerator
             '{NAMESPACE}',
             '{COMMENT}',
             '{USE}',
+            '{USE_ASYNC_EXPORT}',
             '{CLASS_NAME}',
             '{SERVICE}',
+            '{INJECT_ASYNC_EXPORT}',
             '{CONTROLLER_ROUTE}',
             '{FUNCTIONS}',
             '{REQUEST}',
@@ -146,6 +149,7 @@ class ControllerGenerator extends MsProGenerator implements CodeGenerator
             '{RECOVERY_PERMISSION}',
             '{IMPORT_PERMISSION}',
             '{EXPORT_PERMISSION}',
+            '{SERVICE_CLASS}',
             '{DTO_CLASS}',
             '{PK}',
             '{STATUS_VALUE}',
@@ -167,12 +171,14 @@ class ControllerGenerator extends MsProGenerator implements CodeGenerator
             $this->initNamespace(),
             $this->getComment(),
             $this->getUse(),
+            $this->getAsyncExportUse(),
             $this->getClassName(),
             $this->getServiceName(),
+            $this->getAsyncExportInject(),
             $this->getControllerRoute(),
             $this->getFunctions(),
             $this->getRequestName(),
-            sprintf('%s, %s', Str::lower($this->model->module_name).':'.$this->getShortBusinessName(), $this->getMethodRoute('index')),
+            sprintf('%s, %s', Str::lower($this->model->module_name) . ':' . $this->getShortBusinessName(), $this->getMethodRoute('index')),
             $this->getMethodRoute('recycle'),
             $this->getMethodRoute('save'),
             $this->getMethodRoute('read'),
@@ -182,6 +188,7 @@ class ControllerGenerator extends MsProGenerator implements CodeGenerator
             $this->getMethodRoute('recovery'),
             $this->getMethodRoute('import'),
             $this->getMethodRoute('export'),
+            $this->getServiceClass(),
             $this->getDtoClass(),
             $this->getPk(),
             $this->getStatusValue(),
@@ -227,6 +234,24 @@ UseNamespace;
     }
 
     /**
+     * 获取异步导出的类命名空间
+     * @return string
+     */
+    protected function getAsyncExportUse(): string
+    {
+        $menus = $this->model->generate_menus ? explode(',', $this->model->generate_menus) : [];
+        return in_array('export', $menus) ?
+            "use MsPro\\Office\\AsyncExport;" : '';
+    }
+
+    protected function getAsyncExportInject(): string
+    {
+        $menus = $this->model->generate_menus ? explode(',', $this->model->generate_menus) : [];
+        return in_array('export', $menus) ?
+            $this->filesystem->sharedGet($this->getStubDir() . 'Controller/asyncExportInject.stub') : '';
+    }
+
+    /**
      * 获取控制器类名称
      * @return string
      */
@@ -262,7 +287,7 @@ UseNamespace;
      */
     protected function getFunctions(): string
     {
-        $menus = $this->model->generate_menus ? explode(',', $this->model->generate_menus) : [];
+        $menus     = $this->model->generate_menus ? explode(',', $this->model->generate_menus) : [];
         $otherMenu = [$this->model->type === 'single' ? 'singleList' : 'treeList'];
         if (in_array('recycle', $menus)) {
             $otherMenu[] = $this->model->type === 'single' ? 'singleRecycleList' : 'treeRecycleList';
@@ -271,7 +296,7 @@ UseNamespace;
         }
         array_unshift($menus, ...$otherMenu);
         $phpCode = '';
-        $path = $this->getStubDir() . 'Controller/';
+        $path    = $this->getStubDir() . 'Controller/';
         foreach ($menus as $menu) {
             $content = $this->filesystem->sharedGet($path . $menu . '.stub');
             $phpCode .= $content;
@@ -303,6 +328,18 @@ UseNamespace;
             "\%s\Dto\%s::class",
             $this->model->namespace,
             $this->getBusinessName() . 'Dto'
+        );
+    }
+
+    /**
+     * @return string
+     */
+    protected function getServiceClass(): string
+    {
+        return sprintf(
+            "\%s\Service\%s::class",
+            $this->model->namespace,
+            $this->getBusinessName() . 'Service'
         );
     }
 
@@ -363,7 +400,7 @@ UseNamespace;
      */
     protected function getRequestName(): string
     {
-        return $this->getBusinessName(). 'Request';
+        return $this->getBusinessName() . 'Request';
     }
 
     /**
