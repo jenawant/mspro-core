@@ -15,7 +15,7 @@
    * 恢复{BUSINESS_NAME}数据
    * @returns
    */
-  recoverys (data) {
+  recoverys (data = {}) {
     return request({
       url: '{REQUEST_ROUTE}/recovery',
       method: 'put',
@@ -27,7 +27,7 @@
    * 真实删除{BUSINESS_NAME}
    * @returns
    */
-  realDeletes (data) {
+  realDeletes (data = {}) {
     return request({
       url: '{REQUEST_ROUTE}/realDelete',
       method: 'delete',

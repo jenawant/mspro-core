@@ -58,7 +58,7 @@ class ApiGenerator extends MsProGenerator implements CodeGenerator
         $filename = Str::camel(str_replace(env('DB_PREFIX'), '', $this->model->table_name));
         $module = Str::lower($this->model->module_name);
         $this->filesystem->makeDirectory(BASE_PATH . "/runtime/generate/react/src/services/api/{$module}", 0755, true, true);
-        $path = BASE_PATH . "/runtime/generate/react/src/services/api/{$module}/{$filename}.js";
+        $path = BASE_PATH . "/runtime/generate/react/src/services/api/{$module}/{$filename}.ts";
         $this->filesystem->put($path, $this->replace()->getCodeContent());
     }
 
