@@ -10,6 +10,7 @@ namespace MsPro\Generator;
 use App\Setting\Model\SettingGenerateTables;
 use App\Setting\Service\SettingGenerateColumnsService;
 use Hyperf\Database\Schema\Schema;
+use Hyperf\DbConnection\Db;
 use Hyperf\Support\Filesystem\Filesystem;
 use MsPro\Exception\NormalStatusException;
 use MsPro\Helper\Str;
@@ -354,7 +355,7 @@ class ModelGenerator extends MsProGenerator implements CodeGenerator
     protected function getCasts(): string
     {
         $data = make(SettingGenerateColumnsService::class)->getList(
-            ['select' => 'column_name, column_type', 'table_id' => $this->model->id, "column_type LIKE '%int' OR column_type = 'timestamp'"]
+            ['select' => 'column_name, column_type', 'table_id' => $this->model->id, "column_type LIKE '%int' OR column_type = 'timestamp' OR column_type = 'decimal'"]
         );
         $columns = [];
         foreach ($data as $column) {
@@ -362,6 +363,12 @@ class ModelGenerator extends MsProGenerator implements CodeGenerator
                 $column['column_type'] = 'datetime';
             } elseif (str_contains($column['column_type'], 'int')) {
                 $column['column_type'] = 'integer';
+            } elseif ($column['column_type'] == 'decimal') {
+                // 追加数据精度.ADD.JENA.20231108
+                $sql                   = "SELECT COLUMN_TYPE FROM `information_schema`.`columns` WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ? AND COLUMN_NAME = ?";
+                $column_type           = Db::select($sql, [env('DB_DATABASE'), $this->model->table_name, $column['column_name']])[0]->COLUMN_TYPE ?? '';
+                $precision             = preg_match('/\d*,(\d*)/', $column_type, $matches) ? intval($matches[1]) : 0;
+                $column['column_type'] = 'decimal:' . $precision;
             } else {
                 continue;
             }
