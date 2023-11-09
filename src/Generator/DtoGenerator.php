@@ -4,6 +4,7 @@
  */
 
 declare(strict_types=1);
+
 namespace MsPro\Generator;
 
 use App\Setting\Model\SettingGenerateColumns;
@@ -44,7 +45,7 @@ class DtoGenerator extends MsProGenerator implements CodeGenerator
      */
     public function setGenInfo(SettingGenerateTables $model): DtoGenerator
     {
-        $this->model = $model;
+        $this->model      = $model;
         $this->filesystem = make(Filesystem::class);
         if (empty($model->module_name) || empty($model->menu_name)) {
             throw new NormalStatusException(t('setting.gen_code_edit'));
@@ -53,7 +54,7 @@ class DtoGenerator extends MsProGenerator implements CodeGenerator
 
         $this->columns = SettingGenerateColumns::query()
             ->where('table_id', $model->id)->orderByDesc('sort')
-            ->get([ 'column_name', 'column_comment' ]);
+            ->get(['column_name', 'column_comment', 'dict_type']);
 
         return $this->placeholderReplace();
     }
@@ -88,7 +89,7 @@ class DtoGenerator extends MsProGenerator implements CodeGenerator
      */
     protected function getTemplatePath(): string
     {
-        return $this->getStubDir().'/dto.stub';
+        return $this->getStubDir() . '/dto.stub';
     }
 
     /**
@@ -155,7 +156,7 @@ class DtoGenerator extends MsProGenerator implements CodeGenerator
      */
     protected function getComment(): string
     {
-        return $this->model->menu_name. 'Dto （导入导出）';
+        return $this->model->menu_name . 'Dto （导入导出）';
     }
 
     /**
@@ -164,7 +165,7 @@ class DtoGenerator extends MsProGenerator implements CodeGenerator
      */
     protected function getClassName(): string
     {
-        return $this->getBusinessName().'Dto';
+        return $this->getBusinessName() . 'Dto';
     }
 
     /**
@@ -175,19 +176,23 @@ class DtoGenerator extends MsProGenerator implements CodeGenerator
         $phpCode = '';
         foreach ($this->columns as $index => $column) {
             $phpCode .= str_replace(
-                ['NAME', 'INDEX', 'FIELD'],
-                [$column['column_comment'] ?: $column['column_name'], $index, $column['column_name']],
+                ['NAME', 'INDEX', 'FIELD', 'DICT_TYPE'],
+                [$column['column_comment'] ?: $column['column_name'], $index, $column['column_name'], $column['dict_type'] ? ', dictName: "' . $column['dict_type'] . '"' : ''],
                 $this->getCodeTemplate()
             );
         }
         return $phpCode;
     }
 
+    /**
+     * 增加字典注释.ADD.JENA.20231109
+     * @return string
+     */
     protected function getCodeTemplate(): string
     {
         return sprintf(
             "    %s\n    %s\n\n",
-            '#[ExcelProperty(value: "NAME", index: INDEX)]',
+            '#[ExcelProperty(value: "NAME", index: INDEX DICT_TYPE)]',
             'public string $FIELD;'
         );
     }
