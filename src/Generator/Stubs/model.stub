@@ -15,13 +15,13 @@ class {CLASS_NAME} extends MsProModel
      *
      * @var string
      */
-    protected $table = '{TABLE_NAME}';
+    protected string $table = '{TABLE_NAME}';
     /**
      * The attributes that are mass assignable.
      *
      * @var array
      */
-    protected $fillable = [
+    protected array $fillable = [
         {FILL_ABLE}
     ];
     /**
@@ -29,7 +29,7 @@ class {CLASS_NAME} extends MsProModel
      *
      * @var array
      */
-    protected $casts = [
+    protected array $casts = [
         {CASTS}
     ];
 

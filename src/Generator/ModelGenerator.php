@@ -48,7 +48,7 @@ class ModelGenerator extends MsProGenerator implements CodeGenerator
      */
     public function setGenInfo(SettingGenerateTables $model): ModelGenerator
     {
-        $this->model = $model;
+        $this->model      = $model;
         $this->filesystem = make(Filesystem::class);
         if (empty($model->module_name) || empty($model->menu_name)) {
             throw new NormalStatusException(t('setting.gen_code_edit'));
@@ -73,9 +73,9 @@ class ModelGenerator extends MsProGenerator implements CodeGenerator
         $this->filesystem->exists($path) || $this->filesystem->makeDirectory($path, 0755, true, true);
 
         $command = [
-            'command' => 'mspro:model-gen',
+            'command'  => 'mspro:model-gen',
             '--module' => $this->model->module_name,
-            '--table' => $this->model->table_name
+            '--table'  => $this->model->table_name
         ];
 
         if (!Str::contains($this->model->table_name, Str::lower($this->model->module_name))) {
@@ -86,7 +86,7 @@ class ModelGenerator extends MsProGenerator implements CodeGenerator
             throw new NormalStatusException(t('setting.gen_model_error'), 500);
         }
 
-        $input = new ArrayInput($command);
+        $input  = new ArrayInput($command);
         $output = new NullOutput();
 
         /** @var \Symfony\Component\Console\Application $application */
@@ -94,15 +94,15 @@ class ModelGenerator extends MsProGenerator implements CodeGenerator
         $application->setAutoExit(false);
 
         $moduleName = Str::title($this->model->module_name);
-        $modelName = Str::studly(str_replace(env('DB_PREFIX'), '', $this->model->table_name));
+        $modelName  = Str::studly(str_replace(env('DB_PREFIX'), '', $this->model->table_name));
 
         $code = $application->run($input, $output);
         if ($code === 0) {
 
             // 对模型文件处理
             if ($modelName[strlen($modelName) - 1] == 's' && $modelName[strlen($modelName) - 2] != 's') {
-                $oldName = Str::substr($modelName, 0, (strlen($modelName) - 1));
-                $oldPath = BASE_PATH . "/app/{$moduleName}/Model/{$oldName}.php";
+                $oldName    = Str::substr($modelName, 0, (strlen($modelName) - 1));
+                $oldPath    = BASE_PATH . "/app/{$moduleName}/Model/{$oldName}.php";
                 $sourcePath = BASE_PATH . "/app/{$moduleName}/Model/{$modelName}.php";
                 $this->filesystem->put(
                     $sourcePath,
@@ -230,7 +230,7 @@ class ModelGenerator extends MsProGenerator implements CodeGenerator
      */
     protected function getUseClass(): string
     {
-        $uses = [];
+        $uses       = [];
         $softDelete = make(SettingGenerateColumnsService::class)->mapper->first(['table_id' => $this->model->id, 'column_name' => 'deleted_at']);
         if ($softDelete) {
             $uses[] = 'use Hyperf\Database\Model\SoftDeletes;';
@@ -251,7 +251,7 @@ class ModelGenerator extends MsProGenerator implements CodeGenerator
             $properties[] = 'use SoftDeletes;';
         }
         $incrementing = false;
-        $columns = Schema::getColumnTypeListing(str_replace(env('DB_PREFIX'), '', $this->model->table_name));
+        $columns      = Schema::getColumnTypeListing(str_replace(env('DB_PREFIX'), '', $this->model->table_name));
         foreach ($columns as $column) if (str_contains($column['extra'], 'auto_increment')) {
             $incrementing = true;
         }
@@ -266,7 +266,8 @@ class ModelGenerator extends MsProGenerator implements CodeGenerator
             }
         }
         $timestamps = make(SettingGenerateColumnsService::class)->mapper->count(function ($query) {
-            $query->where('table_id', $this->model->id)->whereIn('column_name', ['created_at', 'updated_at', 'deleted_at']);
+            $query->where('table_id', $this->model->id)
+                ->whereIn('column_name', ['created_at', 'updated_at', 'deleted_at']);
         });
         if ($timestamps === 0) {
             $properties[] = 'public $timestamps = false;';
@@ -298,7 +299,7 @@ class ModelGenerator extends MsProGenerator implements CodeGenerator
      */
     protected function getFillAble(): string
     {
-        $data = make(SettingGenerateColumnsService::class)->getList(
+        $data    = make(SettingGenerateColumnsService::class)->getList(
             ['select' => 'column_name', 'table_id' => $this->model->id]
         );
         $columns = [];
@@ -318,24 +319,24 @@ class ModelGenerator extends MsProGenerator implements CodeGenerator
     protected function getProperties(): string
     {
         $typeMapper = [
-            'carbon' => '\Carbon\Carbon',
-            'timestamp' => 'string',
-            'varchar' => 'string',
-            'text' => 'string',
-            'char' => 'string',
-            'int' => 'int',
-            'bigint' => 'int',
+            'carbon'    => '\Carbon\Carbon',
+            'varchar'   => 'string',
+            'text'      => 'string',
+            'char'      => 'string',
+            'int'       => 'int',
+            'bigint'    => 'int',
             'mediumint' => 'int',
-            'smallint' => 'int',
-            'tinyint' => 'int',
-            'decimal' => 'float',
+            'smallint'  => 'int',
+            'tinyint'   => 'int',
+            'decimal'   => 'float',
         ];
-        $data = make(SettingGenerateColumnsService::class)->getList(
+        $data       = make(SettingGenerateColumnsService::class)->getList(
             ['select' => 'column_name, column_comment, column_type', 'table_id' => $this->model->id]
         );
-        $columns = [];
+        $columns    = [];
         foreach ($data as $column) {
-            if ($column['column_type'] == 'timestamp' && ($column['column_name'] == 'created_at' || $column['column_name'] == 'updated_at' || $column['column_name'] == 'deleted_at')) {
+            // 增加类型覆盖.ADD.JENA.20231109
+            if (str_contains($column['column_type'], 'time') || str_contains($column['column_type'], 'date')) {
                 $column['column_type'] = $typeMapper['carbon'];
             } else {
                 $column['column_type'] = $typeMapper[$column['column_type']] ?? 'string';
@@ -354,12 +355,13 @@ class ModelGenerator extends MsProGenerator implements CodeGenerator
      */
     protected function getCasts(): string
     {
-        $data = make(SettingGenerateColumnsService::class)->getList(
-            ['select' => 'column_name, column_type', 'table_id' => $this->model->id, "column_type LIKE '%int' OR column_type = 'timestamp' OR column_type = 'decimal'"]
+        $data    = make(SettingGenerateColumnsService::class)->getList(
+            ['select' => 'column_name, column_type', 'table_id' => $this->model->id, "column_type LIKE '%int' OR column_type LIKE '%time%' OR column_type LIKE '%date%' OR column_type = 'decimal'"]
         );
         $columns = [];
         foreach ($data as $column) {
-            if ($column['column_type'] == 'timestamp') {
+            if (str_contains($column['column_type'], 'time') || str_contains($column['column_type'], 'date')) {
+                // 增加类型覆盖.ADD.JENA.20231109
                 $column['column_type'] = 'datetime';
             } elseif (str_contains($column['column_type'], 'int')) {
                 $column['column_type'] = 'integer';
@@ -385,7 +387,7 @@ class ModelGenerator extends MsProGenerator implements CodeGenerator
     {
         $prefix = env('DB_PREFIX');
         if (!empty($this->model->options['relations'])) {
-            $path = $this->getStubDir() . 'ModelRelation/';
+            $path    = $this->getStubDir() . 'ModelRelation/';
             $phpCode = '';
             foreach ($this->model->options['relations'] as $relation) {
                 $content = $this->filesystem->sharedGet($path . $relation['type'] . '.stub');
