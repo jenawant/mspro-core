@@ -1,0 +1,7 @@
+transform: (value, namePath) => {
+        return {
+          [namePath]: Array.isArray(value)
+            ? value.map((item: any) => item.url ?? item.response).join(",")
+            : value,
+        };
+      },

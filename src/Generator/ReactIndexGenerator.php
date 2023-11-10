@@ -137,6 +137,7 @@ class ReactIndexGenerator extends MsProGenerator implements CodeGenerator
 
         // 扩展：替换函数
         $this->setCodeContent($this->replaceFunctions('{CONVERT_VALUE}', 'convertValue'));
+        $this->setCodeContent($this->replaceFunctions('{TRANSFORM}', 'transform'));
 
         return $this;
     }
@@ -356,7 +357,7 @@ class ReactIndexGenerator extends MsProGenerator implements CodeGenerator
                 if ($column->view_type == 'upload') {
                     $tmp['hideInSearch'] = true;
                     $tmp['convertValue'] = '{CONVERT_VALUE}';
-
+                    $tmp['transform'] = '{TRANSFORM}';
                 }
             }
             // 字典
