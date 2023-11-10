@@ -15,7 +15,7 @@ class {CLASS_NAME} extends MsProModel
      *
      * @var string
      */
-    protected string $table = '{TABLE_NAME}';
+    protected ?string $table = '{TABLE_NAME}';
     /**
      * The attributes that are mass assignable.
      *
