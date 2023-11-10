@@ -47,15 +47,15 @@ class PhpOffice extends MsProExcel implements ExcelPropertyInterface
     public function import(MsProModel $model, ?Closure $closure = null): bool
     {
         $request = container()->get(MsProRequest::class);
-        $data = [];
+        $data    = [];
         if ($request->hasFile('file')) {
-            $file = $request->file('file');
-            $tempFileName = 'import_'.time().'.'.$file->getExtension();
-            $tempFilePath = BASE_PATH . '/runtime/'. $tempFileName;
+            $file         = $request->file('file');
+            $tempFileName = 'import_' . time() . '.' . $file->getExtension();
+            $tempFilePath = BASE_PATH . '/runtime/' . $tempFileName;
             file_put_contents($tempFilePath, $file->getStream()->getContents());
             $reader = IOFactory::createReader(IOFactory::identify($tempFilePath));
             $reader->setReadDataOnly(true);
-            $sheet = $reader->load($tempFilePath);
+            $sheet   = $reader->load($tempFilePath);
             $endCell = isset($this->property) ? $this->getColumnIndex(count($this->property)) : null;
             try {
                 foreach ($sheet->getActiveSheet()->getRowIterator(2) as $row) {
@@ -66,7 +66,7 @@ class PhpOffice extends MsProExcel implements ExcelPropertyInterface
                             $temp[$this->property[$propertyIndex]['name']] = $item->getFormattedValue();
                         }
                     }
-                    if (! empty($temp)) {
+                    if (!empty($temp)) {
                         $data[] = $temp;
                     }
                 }
@@ -128,11 +128,11 @@ class PhpOffice extends MsProExcel implements ExcelPropertyInterface
      */
     public function create(string $filename, array|Closure $closure, Closure $callbackData = null, bool $column_adapter = false, string $folder = BASE_PATH . '/runtime/export'): string
     {
-        $spread = new Spreadsheet();
-        $sheet = $spread->getActiveSheet();
+        $spread   = new Spreadsheet();
+        $sheet    = $spread->getActiveSheet();
         $filename .= '.xlsx';
 
-        if (!is_dir($folder)){
+        if (!is_dir($folder)) {
             mkdir($folder, 0774, true);
         }
 
@@ -143,10 +143,10 @@ class PhpOffice extends MsProExcel implements ExcelPropertyInterface
         foreach ($this->property as $item) {
             $headerColumn = $this->getColumnIndex($titleStart) . '1';
             $sheet->setCellValue($headerColumn, $item['value']);
-            $style = $sheet->getStyle($headerColumn)->getFont()->setBold(true);
+            $style           = $sheet->getStyle($headerColumn)->getFont()->setBold(true);
             $columnDimension = $sheet->getColumnDimension($headerColumn[0]);
 
-            empty($item['width']) ? $columnDimension->setAutoSize(true) : $columnDimension->setWidth((float) $item['width']);
+            empty($item['width']) ? $columnDimension->setAutoSize(true) : $columnDimension->setWidth((float)$item['width']);
 
             empty($item['align']) || $sheet->getStyle($headerColumn)->getAlignment()->setHorizontal($item['align']);
 
@@ -167,9 +167,10 @@ class PhpOffice extends MsProExcel implements ExcelPropertyInterface
             $row = 2;
             while ($generate->valid()) {
                 $column = 0;
-                $items = $generate->current();
+                $items  = $generate->current();
+                console()->info(json_encode($items));
                 foreach ($items as $name => $value) {
-                    $columnRow = $this->getColumnIndex($column) . $row;
+                    $columnRow  = $this->getColumnIndex($column) . $row;
                     $annotation = '';
                     foreach ($this->property as $item) {
                         if ($item['name'] == $name) {
@@ -178,24 +179,14 @@ class PhpOffice extends MsProExcel implements ExcelPropertyInterface
                         }
                     }
 
-                    if (!empty($annotation['dictName'])) {
-                        $sheet->setCellValue($columnRow, $annotation['dictName'][$value]);
-                    } else if (!empty($annotation['path'])){
-                        $sheet->setCellValue($columnRow, \Hyperf\Collection\data_get($items, $annotation['path']));
-                    } else if (!empty($annotation['dictData'])) {
-                        $sheet->setCellValue($columnRow, $annotation['dictData'][$value]);
-                    } else if(!empty($this->dictData[$name])){
-                        $sheet->setCellValue($columnRow, $this->dictData[$name][$value] ?? '');
-                    } else {
-                        $sheet->setCellValue($columnRow, $value . "\t");
-                    }
+                    $sheet->setCellValue($columnRow, $value . "\t");
 
-                    if (! empty($item['color'])) {
+                    if (!empty($item['color'])) {
                         $sheet->getStyle($columnRow)->getFont()
                             ->setColor(new Color(str_replace('#', '', $annotation['color'])));
                     }
 
-                    if (! empty($item['bgColor'])) {
+                    if (!empty($item['bgColor'])) {
                         $sheet->getStyle($columnRow)->getFill()
                             ->setFillType(Fill::FILL_SOLID)
                             ->getStartColor()->setARGB(str_replace('#', '', $annotation['bgColor']));
@@ -205,10 +196,11 @@ class PhpOffice extends MsProExcel implements ExcelPropertyInterface
                 $generate->next();
                 $row++;
             }
-        } catch (RuntimeException $e) {}
+        } catch (RuntimeException $e) {
+        }
 
         $writer = IOFactory::createWriter($spread, 'Xlsx');
-        $file = $folder . $filename;
+        $file   = $folder . $filename;
         $writer->save($file);
         $spread->disconnectWorksheets();
 
@@ -230,7 +222,17 @@ class PhpOffice extends MsProExcel implements ExcelPropertyInterface
                 $dat = $callbackData($dat);
             }
             foreach ($this->property as $item) {
-                $yield[ $item['name'] ] = $dat[$item['name']] ?? '';
+                $value = $dat[$item['name']] ?? '';
+                if (!empty($item['dictName'])) {
+                    $value = $item['dictName'][$value];
+                } else if (!empty($item['path'])) {
+                    $value = \Hyperf\Collection\data_get($dat, $item['path']);
+                } else if (!empty($item['dictData'])) {
+                    $value = $item['dictData'][$value];
+                } else if (!empty($this->dictData[$item['name']])) {
+                    $value = $this->dictData[$item['name']][$value] ?? '';
+                }
+                $yield[$item['name']] = $value;
             }
             yield $yield;
         }
